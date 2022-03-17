@@ -49,6 +49,11 @@ install(
         FILES_MATCHING PATTERN "*.h"
         PATTERN "ed25519_ex.h" EXCLUDE
         PATTERN "openssl_curve_wrapper.h" EXCLUDE
+
+        PATTERN "util.h" EXCLUDE
+        PATTERN "memzero.h" EXCLUDE
+        PATTERN "bip32_ed25519.h" EXCLUDE
+        PATTERN "bip32_ecdsa.h" EXCLUDE
 )
 
 ## Install proto files
