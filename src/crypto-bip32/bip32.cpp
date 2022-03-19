@@ -128,7 +128,7 @@ HDKey HDKey::CreateHDKey(CurveType c_type, const CurvePoint &point, const uint8_
         case CurveType::P256:
         {
             uint8_t pub33[33];
-            point.EncodeEdwardsPoint(pub33);
+            point.EncodeCompressed(pub33);
             _ecdsa::hdnode_from_xpub(depth, child_num, chain_code, pub33, c_type, &hd_key.hd_node_);
             break;
         }
