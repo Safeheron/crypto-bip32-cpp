@@ -253,9 +253,7 @@ int hdnode_public_ckd_ex(HDNode *inout, uint32_t i, BN &delta, CurveType curve_t
     child_pubkey.EncodeCompressed(inout->public_key_);
 
     // Wipe all stack data.
-    memzero(&parent_pubkey, sizeof(parent_pubkey));
     memzero(parent_chain_code, 32);
-    memzero(&child_pubkey, sizeof(child_pubkey));
     memzero(child_chain_code, 32);
 
     return 1;
