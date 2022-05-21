@@ -8,7 +8,7 @@ include_directories("../src")
 
 option(ENABLE_ASSEMBLE "Enable assemble" OFF)
 if (NOT ${ENABLE_ASSEMBLE})
-    link_libraries(CryptoHash
+    link_libraries(CryptoBIP32
             ${GTEST_BOTH_LIBRARIES}
             pthread )
 else()

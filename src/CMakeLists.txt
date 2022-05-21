@@ -14,10 +14,12 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
         ${OPENSSL_INCLUDE_DIR}
+        ${PROTOBUF_INCLUDE_DIRS}
         )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} ${PROTOBUF_LIBRARIES}
+target_link_libraries(${CMAKE_PROJECT_NAME}
         OpenSSL::Crypto
+        ${PROTOBUF_LIBRARIES}
         -ldl
         )
 
@@ -39,7 +41,7 @@ if (NOT ${ENABLE_ASSEMBLE})
     target_link_libraries(${CMAKE_PROJECT_NAME}
             CryptoBN
             CryptoEncode
-            CryptoCurve
             CryptoHash
+            CryptoCurve
             )
 endif()
