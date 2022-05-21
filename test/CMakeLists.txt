@@ -17,5 +17,31 @@ else()
             pthread )
 endif()
 
-add_executable(bip32-test bip32-test.cpp)
-add_test(NAME bip32-test COMMAND bip32-test)
+# test cases for bip32-secp256k1
+add_executable(bip32-secp256k1-serialization-test bip32-secp256k1-serialization-test.cpp)
+add_test(NAME bip32-secp256k1-serialization-test COMMAND bip32-secp256k1-serialization-test)
+
+add_executable(bip32-secp256k1-public-CKD-test bip32-secp256k1-public-CKD-test.cpp)
+add_test(NAME bip32-secp256k1-public-CKD-test COMMAND bip32-secp256k1-public-CKD-test)
+
+add_executable(bip32-secp256k1-private-CKD-test bip32-secp256k1-private-CKD-test.cpp)
+add_test(NAME bip32-secp256k1-private-CKD-test COMMAND bip32-secp256k1-private-CKD-test)
+
+add_executable(bip32-secp256k1-official-test bip32-secp256k1-official-test.cpp)
+add_test(NAME bip32-secp256k1-official-test COMMAND bip32-secp256k1-official-test)
+
+add_executable(bip32-secp256k1-CreateHDKey-test bip32-secp256k1-CreateHDKey-test.cpp)
+add_test(NAME bip32-secp256k1-CreateHDKey-test COMMAND bip32-secp256k1-CreateHDKey-test)
+
+# test cases for bip32-ed25519
+add_executable(bip32-ed25519-serialization-test bip32-ed25519-serialization-test.cpp)
+add_test(NAME bip32-ed25519-serialization-test COMMAND bip32-ed25519-serialization-test)
+
+add_executable(bip32-ed25519-public-CKD-test bip32-ed25519-public-CKD-test.cpp)
+add_test(NAME bip32-ed25519-public-CKD-test COMMAND bip32-ed25519-public-CKD-test)
+
+add_executable(bip32-ed25519-private-CKD-test bip32-ed25519-private-CKD-test.cpp)
+add_test(NAME bip32-ed25519-private-CKD-test COMMAND bip32-ed25519-private-CKD-test)
+
+add_executable(bip32-ed25519-CreateHDKey-test bip32-ed25519-CreateHDKey-test.cpp)
+add_test(NAME bip32-ed25519-CreateHDKey-test COMMAND bip32-ed25519-CreateHDKey-test)
