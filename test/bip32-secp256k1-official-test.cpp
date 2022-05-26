@@ -1,6 +1,3 @@
-//
-// Created by Sword03 on 2020/10/22.
-//
 #include <cstring>
 #include <google/protobuf/stubs/common.h>
 #include "gtest/gtest.h"
@@ -161,7 +158,7 @@ TEST(Bip32, OfficialTestCase_Secp256k1)
             try{
                 testSeedAndCKD_Secp256k1(seed, path, xprv, xpub);
             }catch (const LocatedException &e){
-                std::cout << "exception: " << e.detail() << std::endl;
+                std::cout << "exception: " << e.what() << std::endl;
             }
         }
     }

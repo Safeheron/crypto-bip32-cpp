@@ -1,6 +1,11 @@
-//
-// Created by Sword03 on 2021/7/1.
-//
+/*
+ * Copyright 2020-2022 Safeheron Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.safeheron.com/opensource/license.html
+ */
 
 #include "bip32.h"
 #include <sstream>
@@ -352,7 +357,7 @@ bool HDKey::FromExtendedPublicKey(const char *xpub, CurveType c_type) {
             int ret = _ecdsa::hdnode_deserialize_public_ex(xpub, &version, c_type, &hd_node_, &fingerprint);
             curve_type_ = c_type;
             fingerprint_ = fingerprint;
-            return ret == 0 && (version == static_cast<uint32_t>(Bip32Version::BITCOIN_VERSION_PUBLIC));;
+            return ret == 1 && (version == static_cast<uint32_t>(Bip32Version::BITCOIN_VERSION_PUBLIC));;
         }
         case CurveType::ED25519:
         {
@@ -361,7 +366,7 @@ bool HDKey::FromExtendedPublicKey(const char *xpub, CurveType c_type) {
             int ret = _ed25519::hdnode_deserialize_public_ex(xpub, &version, CurveType::ED25519, &hd_node_, &fingerprint);
             curve_type_ = c_type;
             fingerprint_ = fingerprint;
-            return ret == 0 && (version == static_cast<uint32_t>(Bip32Version::EDDSA_VERSIONS_PUBLIC));;
+            return ret == 1 && (version == static_cast<uint32_t>(Bip32Version::EDDSA_VERSIONS_PUBLIC));;
         }
         default:
             return false;
@@ -382,7 +387,7 @@ bool HDKey::FromExtendedPrivateKey(const char *xprv, CurveType c_type) {
             int ret = _ecdsa::hdnode_deserialize_private_ex(xprv, &version, c_type, &hd_node_, &fingerprint);
             curve_type_ = c_type;
             fingerprint_ = fingerprint;
-            return ret == 0 && (version == static_cast<uint32_t>(Bip32Version::BITCOIN_VERSION_PRIVATE));
+            return ret == 1 && (version == static_cast<uint32_t>(Bip32Version::BITCOIN_VERSION_PRIVATE));
             return true;
         }
         case CurveType::ED25519:
@@ -392,7 +397,7 @@ bool HDKey::FromExtendedPrivateKey(const char *xprv, CurveType c_type) {
             int ret = _ed25519::hdnode_deserialize_private_ex(xprv, &version, CurveType::ED25519, &hd_node_, &fingerprint);
             curve_type_ = c_type;
             fingerprint_ = fingerprint;
-            return ret == 0 && (version == static_cast<uint32_t>(Bip32Version::EDDSA_VERSIONS_PRIVATE));
+            return ret == 1 && (version == static_cast<uint32_t>(Bip32Version::EDDSA_VERSIONS_PRIVATE));
         }
         default:
             return false;
@@ -458,13 +463,11 @@ bool HDKey::FromSeed(CurveType curve_type, const uint8_t *seed, int seed_len) {
         case CurveType::SECP256K1:
         case CurveType::P256:
         {
-            _ecdsa::hdnode_from_seed(seed, seed_len, curve_type, &hd_node_);
-            return true;
+            return _ecdsa::hdnode_from_seed(seed, seed_len, curve_type, &hd_node_) == 1;
         }
         case CurveType::ED25519:
         {
-            _ed25519::hdnode_from_seed(seed, seed_len, curve::CurveType::ED25519, &hd_node_);
-            return true;
+            return _ed25519::hdnode_from_seed(seed, seed_len, curve::CurveType::ED25519, &hd_node_) == 1;
         }
         default:
             return false;

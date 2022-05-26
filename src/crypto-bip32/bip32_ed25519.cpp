@@ -1,6 +1,11 @@
-//
-// Created by Sword03 on 2021/5/16.
-//
+/*
+ * Copyright 2020-2022 Safeheron Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License 2.0 (the "License").  You may not use
+ * this file except in compliance with the License.  You can obtain a copy
+ * in the file LICENSE in the source distribution or at
+ * https://www.safeheron.com/opensource/license.html
+ */
 
 #include "bip32_ed25519.h"
 #include <sstream>
@@ -51,7 +56,7 @@ int hdnode_from_seed(const uint8_t *seed, int seed_len, safeheron::curve::CurveT
     a = BN::FromBytesLE(I, 32);
     a = a % curv->n;
     if (a == 0){  // != 0
-        throw LocatedException(__FILE__, __LINE__, __FUNCTION__, 0);
+        return 0;
     }
 
     memzero(out, sizeof(HDNode));
@@ -288,7 +293,7 @@ int hdnode_deserialize_ex(const char *str, uint32_t *version,
     }
     node->child_num_ = read_be(node_data + 9);
     memcpy(node->chain_code_, node_data + 13, 32);
-    return 0;
+    return 1;
 }
 
 int hdnode_deserialize_public_ex(const char *str, uint32_t *version,

@@ -1,6 +1,3 @@
-//
-// Created by Sword03 on 2020/10/22.
-//
 #include <cstring>
 #include <google/protobuf/stubs/common.h>
 #include "gtest/gtest.h"
