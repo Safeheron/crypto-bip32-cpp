@@ -17,18 +17,16 @@ find_package(CryptoBIP32 REQUIRED)
 
 add_executable(example example.cpp)
 target_include_directories(example PUBLIC
-        ${CryptoBN_INCLUDE_DIRS}
-        ${CryptoCurve_INCLUDE_DIRS}
+        ${OPENSSL_INCLUDE_DIR}
         ${CryptoBIP32_INCLUDE_DIRS}
-        ${GTEST_INCLUDE_DIRS}
         ${PROTOBUF_INCLUDE_DIRS}
+        /usr/local/include  # This directory is included default on linux but not on Mac os
         )
 
+# This directory is included default on linux but not on Mac os
+target_link_directories(${PROJECT_NAME} PUBLIC /usr/local/lib)
 target_link_libraries(example PUBLIC
-        CryptoBN
-        CryptoCurve
         CryptoBIP32
         OpenSSL::Crypto
         ${PROTOBUF_LINK_LIBRARIES}
-        ${GTEST_BOTH_LIBRARIES}
         pthread )
