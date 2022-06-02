@@ -7,6 +7,11 @@
  * https://www.safeheron.com/opensource/license.html
  */
 
+/**
+ * To do:
+ * - Check if input "keypath_str" in function ParseHDPath is valid.
+ */
+
 #ifndef SAFEHERON_CRYPTOBIP32_HDPATH_H
 #define SAFEHERON_CRYPTOBIP32_HDPATH_H
 

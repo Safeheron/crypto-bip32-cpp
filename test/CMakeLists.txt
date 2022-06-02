@@ -47,3 +47,6 @@ add_test(NAME bip32-ed25519-private-CKD-test COMMAND bip32-ed25519-private-CKD-t
 
 add_executable(bip32-ed25519-CreateHDKey-test bip32-ed25519-CreateHDKey-test.cpp)
 add_test(NAME bip32-ed25519-CreateHDKey-test COMMAND bip32-ed25519-CreateHDKey-test)
+
+add_executable(bip32-hd-path-test bip32-hd-path-test.cpp)
+add_test(NAME bip32-hd-path-test COMMAND bip32-hd-path-test)
