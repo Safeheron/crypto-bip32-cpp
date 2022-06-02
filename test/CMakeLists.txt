@@ -4,10 +4,12 @@ find_package(PkgConfig REQUIRED)
 pkg_search_module(PROTOBUF REQUIRED protobuf)  # this looks for opencv.pc file
 
 include_directories(${GTEST_INCLUDE_DIRS})
-include_directories("../src")
+include_directories(../src)
+include_directories(/usr/local/include)
 
 option(ENABLE_ASSEMBLE "Enable assemble" OFF)
 if (NOT ${ENABLE_ASSEMBLE})
+    link_directories(/usr/local/lib)
     link_libraries(CryptoBIP32
             ${GTEST_BOTH_LIBRARIES}
             pthread )
