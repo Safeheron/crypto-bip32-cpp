@@ -124,7 +124,7 @@ uint32_t hdnode_fingerprint(const HDNode *node) {
 
 void hdnode_fill_public_key(HDNode *node) {
     assert(is_valid_curve_type(static_cast<CurveType>(node->curve_type_)));
-    uint has_pub = 0;
+    uint32_t has_pub = 0;
     for(int i = 0; i < 33; i++){
         has_pub = has_pub | node->public_key_[i];
     }
