@@ -8,8 +8,6 @@
  */
 
 #include "bip32.h"
-#include <sstream>
-#include <stdio.h>
 #include "hd_path.h"
 #include "bip32_ed25519.h"
 #include "bip32_ecdsa.h"

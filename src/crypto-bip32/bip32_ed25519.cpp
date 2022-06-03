@@ -8,8 +8,6 @@
  */
 
 #include "bip32_ed25519.h"
-#include <sstream>
-#include <stdio.h>
 #include "crypto-curve/curve.h"
 #include "crypto-hash/hmac_sha512.h"
 #include "crypto-hash/sha256.h"

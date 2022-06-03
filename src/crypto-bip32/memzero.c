@@ -9,8 +9,12 @@
 #endif
 
 #ifdef __unix__
+#ifdef SAFEHERON_SGX_SDK
+#define HAVE_MEMSET_S 1
+#else
 #include <strings.h>
 #include <sys/param.h>
+#endif
 #endif
 
 // C11's bounds-checking interface.

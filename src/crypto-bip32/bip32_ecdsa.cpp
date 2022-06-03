@@ -8,14 +8,11 @@
  */
 
 #include "bip32_ecdsa.h"
-#include <sstream>
-#include <stdio.h>
 #include "crypto-curve/curve.h"
 #include "crypto-hash/hmac_sha512.h"
 #include "crypto-hash/sha256.h"
 #include "crypto-hash/ripemd160.h"
 #include "crypto-encode/base58.h"
-#include "crypto-encode/hex.h"
 #include "exception/located_exception.h"
 #include "hd_path.h"
 #include "bip32.h"
@@ -208,7 +205,6 @@ int hdnode_public_ckd_cp_ex(const CurvePoint &parent,
 
     parent.EncodeCompressed(data);
     write_be(data + 33, i);
-    std::cout << "data: " << hex::EncodeToHex(data, 37) << std::endl;
 
     while (true) {
         CHMAC_SHA512(parent_chain_code, 32)
