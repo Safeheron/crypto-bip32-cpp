@@ -50,3 +50,12 @@ add_test(NAME bip32-ed25519-CreateHDKey-test COMMAND bip32-ed25519-CreateHDKey-t
 
 add_executable(bip32-hd-path-test bip32-hd-path-test.cpp)
 add_test(NAME bip32-hd-path-test COMMAND bip32-hd-path-test)
+
+add_executable(bip32-ed25519-WithJs-test bip32-ed25519-WithJs-test.cpp)
+add_test(NAME bip32-ed25519-WithJs-test COMMAND bip32-ed25519-WithJs-test)
+
+add_executable(generate-data-test generate-data-test.cpp)
+add_test(NAME generate-data-test COMMAND generate-data-test)
+
+add_executable(bip32-boundary-test bip32-boundary-test.cpp)
+add_test(NAME bip32-boundary-test COMMAND bip32-boundary-test)

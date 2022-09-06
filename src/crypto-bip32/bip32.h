@@ -148,7 +148,7 @@ public:
      * @param[in] path
      * @return a HDKey object.
      */
-    HDKey PrivateCKDPath(std::string &path) const;
+    HDKey PrivateCKDPath(const std::string &path) const;
 
     /**
      * Public child key derivation according to specified path.

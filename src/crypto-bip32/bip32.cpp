@@ -12,6 +12,7 @@
 #include "bip32_ed25519.h"
 #include "bip32_ecdsa.h"
 #include "common.h"
+#include "memzero.h"
 
 using safeheron::bignum::BN;
 using safeheron::curve::Curve;
@@ -85,9 +86,10 @@ HDKey &HDKey::operator=(const HDKey &hd_key) {
 HDKey::~HDKey() {
     fingerprint_ = 0;
     curve_type_ = CurveType::INVALID_CURVE;
-    memset(&hd_node_, 0, sizeof(HDNode));
+    crypto_bip32_memzero(&hd_node_, sizeof(HDNode));
+    //memset(&hd_node_, 0, sizeof(HDNode));
 }
-
+////修改为非static的，返回bool类型的返回值，判断是否成功创建
 HDKey HDKey::CreateHDKey(CurveType c_type, const BN &privateKey, const uint8_t *chain_code,
                          uint32_t depth, uint32_t child_num, uint32_t fingerprint) {
     HDKey hd_key;
@@ -312,7 +314,7 @@ HDKey HDKey::PrivateCKDPath(const char *path) const {
     return child_key;
 }
 
-HDKey HDKey::PrivateCKDPath(std::string &path) const {
+HDKey HDKey::PrivateCKDPath(const std::string &path) const {
     return PrivateCKDPath(path.c_str());
 }
 
@@ -364,7 +366,7 @@ bool HDKey::FromExtendedPublicKey(const char *xpub, CurveType c_type) {
             int ret = _ed25519::hdnode_deserialize_public_ex(xpub, &version, CurveType::ED25519, &hd_node_, &fingerprint);
             curve_type_ = c_type;
             fingerprint_ = fingerprint;
-            return ret == 1 && (version == static_cast<uint32_t>(Bip32Version::EDDSA_VERSIONS_PUBLIC));;
+            return ret == 1 && (version == static_cast<uint32_t>(Bip32Version::EDDSA_VERSIONS_PUBLIC));
         }
         default:
             return false;
@@ -386,7 +388,7 @@ bool HDKey::FromExtendedPrivateKey(const char *xprv, CurveType c_type) {
             curve_type_ = c_type;
             fingerprint_ = fingerprint;
             return ret == 1 && (version == static_cast<uint32_t>(Bip32Version::BITCOIN_VERSION_PRIVATE));
-            return true;
+        //    return true;
         }
         case CurveType::ED25519:
         {
