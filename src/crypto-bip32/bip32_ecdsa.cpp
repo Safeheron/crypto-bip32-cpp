@@ -58,13 +58,20 @@ int hdnode_from_seed(const uint8_t *seed, int seed_len, safeheron::curve::CurveT
     memcpy(out->private_key_, I, 32);
     memcpy(out->chain_code_, I + 32, 32);
     memzero(out->public_key_, sizeof(out->public_key_));
+    memzero(I, 64);
     return 1;
 }
 
-void hdnode_from_xprv(uint32_t depth, uint32_t child_num,
+int hdnode_from_xprv(uint32_t depth, uint32_t child_num,
                       const uint8_t *chain_code, const uint8_t *private_key,
                       safeheron::curve::CurveType curve_type, HDNode *out) {
     assert(is_valid_curve_type(static_cast<CurveType>(curve_type)));
+    const Curve *curv = curve::GetCurveParam(curve_type);
+    BN a;
+    a = BN::FromBytesBE(private_key, 32);
+    if ( (a == 0) || (a >= curv->n) ){  // Invalid index
+        return 0;
+    }
     out->curve_type_ = static_cast<uint32_t>(curve_type);
     out->depth_ = depth;
     out->child_num_ = child_num;
@@ -72,6 +79,7 @@ void hdnode_from_xprv(uint32_t depth, uint32_t child_num,
     memcpy(out->private_key_, private_key, 32);
     memzero(out->public_key_, sizeof(out->public_key_));
     memzero(out->private_key_extension_, sizeof(out->private_key_extension_));
+    return 1;
 }
 
 int hdnode_from_xpub(uint32_t depth, uint32_t child_num,
@@ -81,6 +89,8 @@ int hdnode_from_xpub(uint32_t depth, uint32_t child_num,
     if ( public_key[0] != 0x02 && public_key[0] != 0x03 ) {  // invalid pubkey
         return 0;
     }
+    CurvePoint p;
+    if(!p.DecodeCompressed(public_key, curve_type)) return 0;
     out->depth_ = depth;
     out->child_num_ = child_num;
     out->curve_type_ = static_cast<uint32_t>(curve_type);
@@ -107,6 +117,7 @@ uint32_t hdnode_fingerprint(const HDNode *node) {
                   (digest[2] << 8) + digest[3];
     memzero(sha256_digest, sizeof(sha256_digest));
     memzero(digest, sizeof(digest));
+    memzero(&t_node, sizeof(HDNode));
     return fingerprint;
 }
 
@@ -134,7 +145,6 @@ int hdnode_private_ckd(HDNode *inout, uint32_t i) {
         data[0] = 0;
         memcpy(data + 1, inout->private_key_, 32);
     } else {  // public derivation, normal(no hardened) derivation
-        data[0] = 0x00;
         BN x = BN::FromBytesBE(inout->private_key_, 32);
         CurvePoint point = curv->g * x;
         point.EncodeCompressed(data);
@@ -203,20 +213,21 @@ int hdnode_public_ckd_cp_ex(const CurvePoint &parent,
                 .Finalize(I);
 
         BN il = BN::FromBytesBE(I, 32);
-        CurvePoint point_il = curv->g * il;
-        child = parent + point_il;
-        if (!child.IsInfinity()) {
-            if (child_chain_code) {
-                memcpy(child_chain_code, I + 32, 32);
+        if (il < curv->n) {
+            CurvePoint point_il = curv->g * il;
+            child = parent + point_il;
+            if (!child.IsInfinity()) {
+                if (child_chain_code) {
+                    memcpy(child_chain_code, I + 32, 32);
+                }
+
+                delta = il;
+                // Wipe all stack data.
+                memzero(data, sizeof(data));
+                memzero(I, sizeof(I));
+                return 1;
             }
-
-            delta = il;
-            // Wipe all stack data.
-            memzero(data, sizeof(data));
-            memzero(I, sizeof(I));
-            return 1;
         }
-
         // child_num = child_num + 1 if failed
         write_be(data + 33, ++i);
     }
@@ -269,13 +280,21 @@ int hdnode_deserialize_ex(const char *str, uint32_t *version,
 
     if (use_private) {
         // invalid data
-        if (node_data[45]) {
-            return -2;
+//        if (node_data[45]) {
+//            return -2;
+//        }
+        memzero(node->public_key_, sizeof(node->public_key_));
+        const Curve *curv = curve::GetCurveParam(curve_type);
+        BN a;
+        a = BN::FromBytesBE(node_data + 46, 32);
+        if ( (a == 0) || (a >= curv->n) ){  // Invalid index
+            return 0;
         }
         memcpy(node->private_key_, node_data + 46, 32);
-        memzero(node->public_key_, sizeof(node->public_key_));
     } else {
         memzero(node->private_key_, sizeof(node->private_key_));
+        CurvePoint p;
+        if(!p.DecodeCompressed(node_data + 45, curve_type)) return 0;
         memcpy(node->public_key_, node_data + 45, 33);
     }
     node->depth_ = node_data[4];
@@ -284,6 +303,7 @@ int hdnode_deserialize_ex(const char *str, uint32_t *version,
     }
     node->child_num_ = read_be(node_data + 9);
     memcpy(node->chain_code_, node_data + 13, 32);
+    memzero(node_data, 78);
     return 1;
 }
 

@@ -47,7 +47,7 @@ int hdnode_from_seed(const uint8_t *seed, int seed_len, safeheron::curve::CurveT
     if (a == 0){  // != 0
         return 0;
     }
-
+    a.ToBytes32LE(I);
     memzero(out, sizeof(HDNode));
     out->depth_ = 0;
     out->child_num_ = 0;
@@ -55,13 +55,21 @@ int hdnode_from_seed(const uint8_t *seed, int seed_len, safeheron::curve::CurveT
     memcpy(out->private_key_, I, 32);
     memcpy(out->chain_code_, I + 32, 32);
     memzero(out->public_key_, sizeof(out->public_key_));
+    memzero(I, 64);
     return 1;
 }
 
-void hdnode_from_xprv(uint32_t depth, uint32_t child_num,
+int hdnode_from_xprv(uint32_t depth, uint32_t child_num,
                              const uint8_t *chain_code, const uint8_t *private_key,
                              safeheron::curve::CurveType curve_type, HDNode *out) {
     assert(curve_type == CurveType::ED25519);
+    const Curve *curv = curve::GetCurveParam(curve_type);
+    BN a;
+    a = BN::FromBytesLE(private_key, 32);
+    if (a >= curv->n || a == 0){  // Invalid index
+        return 0;
+    }
+
     out->curve_type_ = static_cast<uint32_t>(curve_type);
     out->depth_ = depth;
     out->child_num_ = child_num;
@@ -69,6 +77,7 @@ void hdnode_from_xprv(uint32_t depth, uint32_t child_num,
     memcpy(out->private_key_, private_key, 32);
     memzero(out->public_key_, sizeof(out->public_key_));
     memzero(out->private_key_extension_, sizeof(out->private_key_extension_));
+    return 1;
 }
 
 int hdnode_from_xpub(uint32_t depth, uint32_t child_num,
@@ -78,6 +87,8 @@ int hdnode_from_xpub(uint32_t depth, uint32_t child_num,
     if (public_key[0] != 0x00) {  // invalid pubkey
         return 0;
     }
+    CurvePoint p;
+    if(!p.DecodeEdwardsPoint(const_cast<uint8_t*>(public_key + 1), curve_type)) return 0;
     out->depth_ = depth;
     out->child_num_ = child_num;
     out->curve_type_ = static_cast<uint32_t>(curve_type);
@@ -104,6 +115,7 @@ uint32_t hdnode_fingerprint(const HDNode *node) {
                   (digest[2] << 8) + digest[3];
     memzero(sha256_digest, sizeof(sha256_digest));
     memzero(digest, sizeof(digest));
+    memzero(&t_node, sizeof(HDNode));
     return fingerprint;
 }
 
@@ -265,16 +277,25 @@ int hdnode_deserialize_ex(const char *str, uint32_t *version,
 
     if (use_private) {
         // invalid data
-        if (node_data[45]) {
-            return -2;
+//        if (node_data[45]) {
+//            return -2;
+//        }
+        memzero(node->public_key_, sizeof(node->public_key_));
+        const Curve *curv = curve::GetCurveParam(curve_type);
+        BN a;
+        a = BN::FromBytesLE(node_data + 46, 32);
+        if ( (a == 0) || (a >= curv->n) ){  // Invalid index
+            return 0;
         }
         memcpy(node->private_key_, node_data + 46, 32);
-        memzero(node->public_key_, sizeof(node->public_key_));
     } else {
         memzero(node->private_key_, sizeof(node->private_key_));
-        memcpy(node->public_key_, node_data + 45, 33);
+//        if (node_data[45]) {
+//            return -2;
+//        }
         CurvePoint point;
-        if (!point.DecodeEdwardsPoint(node->public_key_ + 1, CurveType::ED25519)) return -3;
+        if (!point.DecodeEdwardsPoint(node_data + 46, CurveType::ED25519)) return -3;
+        memcpy(node->public_key_, node_data + 45, 33);
     }
     node->depth_ = node_data[4];
     if (fingerprint) {
@@ -282,6 +303,7 @@ int hdnode_deserialize_ex(const char *str, uint32_t *version,
     }
     node->child_num_ = read_be(node_data + 9);
     memcpy(node->chain_code_, node_data + 13, 32);
+    memzero(node_data, 78);
     return 1;
 }
 

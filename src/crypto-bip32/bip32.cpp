@@ -3,6 +3,7 @@
 #include "bip32_ed25519.h"
 #include "bip32_ecdsa.h"
 #include "common.h"
+#include "memzero.h"
 
 using safeheron::bignum::BN;
 using safeheron::curve::Curve;
@@ -76,7 +77,7 @@ HDKey &HDKey::operator=(const HDKey &hd_key) {
 HDKey::~HDKey() {
     fingerprint_ = 0;
     curve_type_ = CurveType::INVALID_CURVE;
-    memset(&hd_node_, 0, sizeof(HDNode));
+    crypto_bip32_memzero(&hd_node_, sizeof(HDNode));
 }
 
 HDKey HDKey::CreateHDKey(CurveType c_type, const BN &privateKey, const uint8_t *chain_code,
@@ -93,6 +94,7 @@ HDKey HDKey::CreateHDKey(CurveType c_type, const BN &privateKey, const uint8_t *
             uint8_t priv[32];
             privateKey.ToBytes32BE(priv);
             _ecdsa::hdnode_from_xprv(depth, child_num, chain_code, priv, c_type, &hd_key.hd_node_);
+            crypto_bip32_memzero(priv, 32);
             break;
         }
         case CurveType::ED25519:
@@ -100,6 +102,7 @@ HDKey HDKey::CreateHDKey(CurveType c_type, const BN &privateKey, const uint8_t *
             uint8_t priv[32];
             privateKey.ToBytes32LE(priv);
             _ed25519::hdnode_from_xprv(depth, child_num, chain_code, priv, CurveType::ED25519, &hd_key.hd_node_);
+            crypto_bip32_memzero(priv, 32);
             break;
         }
         default:
@@ -224,6 +227,7 @@ HDKey HDKey::PrivateCKD(uint32_t i) const{
             HDKey child_key(*this);
             child_key.hd_node_ = hd_node;
             child_key.fingerprint_ = fingerprint;
+            crypto_bip32_memzero(&hd_node, sizeof(HDNode));
             return child_key;
         }
         case CurveType::ED25519:
@@ -235,6 +239,7 @@ HDKey HDKey::PrivateCKD(uint32_t i) const{
             HDKey child_key(*this);
             child_key.hd_node_ = hd_node;
             child_key.fingerprint_ = fingerprint;
+            crypto_bip32_memzero(&hd_node, sizeof(HDNode));
             return child_key;
         }
         default:
@@ -262,6 +267,7 @@ HDKey HDKey::PublicCKD(uint32_t i, safeheron::bignum::BN &delta) const{
             HDKey child_key(*this);
             child_key.hd_node_ = hd_node;
             child_key.fingerprint_ = fingerprint;
+            crypto_bip32_memzero(&hd_node, sizeof(HDNode));
             return child_key;
         }
         case CurveType::ED25519:
@@ -281,6 +287,7 @@ HDKey HDKey::PublicCKD(uint32_t i, safeheron::bignum::BN &delta) const{
             HDKey child_key(*this);
             child_key.hd_node_ = hd_node;
             child_key.fingerprint_ = fingerprint;
+            crypto_bip32_memzero(&hd_node, sizeof(HDNode));
             return child_key;
         }
         default:
@@ -303,7 +310,7 @@ HDKey HDKey::PrivateCKDPath(const char *path) const {
     return child_key;
 }
 
-HDKey HDKey::PrivateCKDPath(std::string &path) const {
+HDKey HDKey::PrivateCKDPath(const std::string &path) const {
     return PrivateCKDPath(path.c_str());
 }
 
@@ -355,7 +362,7 @@ bool HDKey::FromExtendedPublicKey(const char *xpub, CurveType c_type) {
             int ret = _ed25519::hdnode_deserialize_public_ex(xpub, &version, CurveType::ED25519, &hd_node_, &fingerprint);
             curve_type_ = c_type;
             fingerprint_ = fingerprint;
-            return ret == 1 && (version == static_cast<uint32_t>(Bip32Version::EDDSA_VERSIONS_PUBLIC));;
+            return ret == 1 && (version == static_cast<uint32_t>(Bip32Version::EDDSA_VERSIONS_PUBLIC));
         }
         default:
             return false;
@@ -377,7 +384,6 @@ bool HDKey::FromExtendedPrivateKey(const char *xprv, CurveType c_type) {
             curve_type_ = c_type;
             fingerprint_ = fingerprint;
             return ret == 1 && (version == static_cast<uint32_t>(Bip32Version::BITCOIN_VERSION_PRIVATE));
-            return true;
         }
         case CurveType::ED25519:
         {
@@ -398,9 +404,6 @@ bool HDKey::FromExtendedPrivateKey(const std::string &xprv, CurveType c_type) {
 }
 
 bool HDKey::ToExtendedPrivateKey(std::string &xprv) const {
-    char t_xpriv[200];
-    memset(t_xpriv, 0, sizeof(t_xpriv));
-
     switch (curve_type_) {
         case CurveType::SECP256K1:
         case CurveType::P256:
@@ -419,9 +422,6 @@ bool HDKey::ToExtendedPrivateKey(std::string &xprv) const {
 }
 
 bool HDKey::ToExtendedPublicKey(std::string &xpub) const {
-    char t_xpub[200];
-    memset(t_xpub, 0, sizeof(t_xpub));
-
     switch (curve_type_) {
         case CurveType::SECP256K1:
         case CurveType::P256:
@@ -429,7 +429,7 @@ bool HDKey::ToExtendedPublicKey(std::string &xpub) const {
             HDNode t_node = hd_node_;
             _ecdsa::hdnode_fill_public_key(&t_node);
             xpub = _ecdsa::hdnode_serialize_public(&t_node, fingerprint_, static_cast<uint32_t>(get_coin_version(curve_type_, false)));
-            memset(&t_node, 0, sizeof(t_node));
+            crypto_bip32_memzero(&t_node, sizeof(t_node));
             return true;
         }
         case CurveType::ED25519:
@@ -437,7 +437,7 @@ bool HDKey::ToExtendedPublicKey(std::string &xpub) const {
             HDNode t_node = hd_node_;
             _ed25519::hdnode_fill_public_key(&t_node);
             xpub = _ed25519::hdnode_serialize_public(&t_node, fingerprint_, static_cast<uint32_t>(get_coin_version(curve_type_, false)));
-            memset(&t_node, 0, sizeof(t_node));
+            crypto_bip32_memzero(&t_node, sizeof(t_node));
             return true;
         }
         default:

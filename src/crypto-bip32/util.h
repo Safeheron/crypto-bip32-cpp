@@ -1,7 +1,3 @@
-//
-// Created by Sword03 on 2022/3/11.
-//
-
 #ifndef _SAFEHERON_CRYPTOBIP32_UTIL_H
 #define _SAFEHERON_CRYPTOBIP32_UTIL_H
 

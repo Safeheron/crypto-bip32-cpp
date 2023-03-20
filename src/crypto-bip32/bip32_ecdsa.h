@@ -28,7 +28,7 @@ int hdnode_from_seed(const uint8_t *seed, int seed_len, safeheron::curve::CurveT
  * @param[in] curve_type
  * @param[out] out
  */
-void hdnode_from_xprv(uint32_t depth, uint32_t child_num,
+int hdnode_from_xprv(uint32_t depth, uint32_t child_num,
                       const uint8_t *chain_code, const uint8_t *private_key,
                       safeheron::curve::CurveType curve_type, HDNode *out);
 

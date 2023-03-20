@@ -18,13 +18,17 @@ bool HDPath::ParseHDPath(const std::string &keypath_str, std::vector<uint32_t> &
             item = keypath_str.substr(start);
         }
         start = end + 1;
-        if (item.compare("m") == 0) {
-            if (first) {
-                first = false;
+        if (item == "") return false;
+
+        if (first) {
+            first = false;
+            if (item.compare("m") == 0 || item.compare("M") == 0) {
                 continue;
+            } else {
+                return false;
             }
-            return false;
         }
+
         // Finds whether it is hardened
         uint32_t path = 0;
         size_t pos = item.find('\'');
@@ -44,6 +48,9 @@ bool HDPath::ParseHDPath(const std::string &keypath_str, std::vector<uint32_t> &
         uint32_t number;
         char *ptr = nullptr;
         number = strtoul(item.c_str(), &ptr, 10);
+
+        if (number > 0x80000000) return false;
+
         path |= number;
 
         keypath.push_back(path);
